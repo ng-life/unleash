@@ -75,12 +75,7 @@ export default class ProjectApi extends Controller {
         res: Response<ProjectsSchema>,
     ): Promise<void> {
         const { user } = req;
-        const projects = await this.projectService.getProjects(
-            {
-                id: 'default',
-            },
-            user.id,
-        );
+        const projects = await this.projectService.getProjects(null, user.id);
 
         this.openApiService.respondWithValidation(
             200,
