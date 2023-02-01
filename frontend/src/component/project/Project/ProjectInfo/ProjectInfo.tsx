@@ -7,6 +7,8 @@ import { ToggleTypesWidget } from './ToggleTypesWidget';
 import { MetaWidget } from './MetaWidget';
 import { ProjectMembersWidget } from './ProjectMembersWidget';
 import useUiConfig from 'hooks/api/getters/useUiConfig/useUiConfig';
+import { ProjectStatsSchema } from '@server/openapi';
+import { ChangeRequestsWidget } from './ChangeRequestsWidget';
 
 interface IProjectInfoProps {
     id: string;
@@ -14,6 +16,7 @@ interface IProjectInfoProps {
     features: IFeatureToggleListItem[];
     health: number;
     description?: string;
+    stats: ProjectStatsSchema;
 }
 
 const ProjectInfo = ({
@@ -22,11 +25,20 @@ const ProjectInfo = ({
     memberCount,
     health,
     features,
+    stats,
 }: IProjectInfoProps) => {
-    const { uiConfig } = useUiConfig();
+    const { uiConfig, isEnterprise } = useUiConfig();
+
     return (
         <aside>
             <StyledProjectInfoSidebarContainer>
+                <ConditionallyRender
+                    condition={
+                        isEnterprise() &&
+                        Boolean(uiConfig?.flags.newProjectOverview)
+                    }
+                    show={<ChangeRequestsWidget projectId={id} />}
+                />
                 <ConditionallyRender
                     condition={Boolean(uiConfig?.flags.newProjectOverview)}
                     show={<MetaWidget id={id} description={description} />}
@@ -43,6 +55,7 @@ const ProjectInfo = ({
                         <ProjectMembersWidget
                             projectId={id}
                             memberCount={memberCount}
+                            change={stats?.projectMembersAddedCurrentWindow}
                         />
                     }
                 />
